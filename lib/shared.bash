@@ -65,10 +65,6 @@ build_cache_image_name() {
   local tag="${BUILDKITE_PLUGIN_DOCKER_CACHE_TAG:-cache}"
 
   case "$provider" in
-    acr)
-      local registry="${BUILDKITE_PLUGIN_DOCKER_CACHE_ACR_REGISTRY}"
-      echo "${registry}/${base_image}:${tag}-${cache_key}"
-      ;;
     ecr)
       local registry_url="${DOCKER_CACHE_ECR_REGISTRY_URL}"
       echo "${registry_url}/${base_image}:${tag}-${cache_key}"

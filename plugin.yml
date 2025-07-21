@@ -8,7 +8,7 @@ configuration:
   properties:
     provider:
       type: string
-      enum: [ecr, gar, dockerhub, acr]
+      enum: [ecr, gar, dockerhub]
       description: Registry provider type
     image:
       type: string
@@ -67,20 +67,6 @@ configuration:
         repository:
           type: string
           description: Docker Hub repository name
-      additionalProperties: false
-    acr:
-      type: object
-      description: Azure Container Registry configuration
-      properties:
-        registry:
-          type: string
-          description: ACR registry name
-        username:
-          type: string
-          description: Azure service principal or username
-        password:
-          type: string
-          description: Azure service principal password or access key
       additionalProperties: false
     verbose:
       type: boolean

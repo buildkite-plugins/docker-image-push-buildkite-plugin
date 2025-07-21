@@ -20,8 +20,6 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/shared.bash"
 plugin_init_defaults
 
 # Load provider implementations
-# shellcheck source=lib/providers/acr.bash
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/acr.bash"
 # shellcheck source=lib/providers/ecr.bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/ecr.bash"
 # shellcheck source=lib/providers/gar.bash
@@ -40,9 +38,6 @@ setup_provider_environment() {
   local provider="$1"
 
   case "$provider" in
-    acr)
-      setup_acr_environment
-      ;;
     ecr)
       setup_ecr_environment
       ;;
@@ -114,9 +109,6 @@ restore_cache() {
   log_info "Restoring cache from $provider"
 
   case "$provider" in
-    acr)
-      restore_acr_cache "$cache_key"
-      ;;
     ecr)
       restore_ecr_cache "$cache_key"
       ;;
@@ -144,9 +136,6 @@ save_cache() {
   log_info "Saving cache to $provider"
 
   case "$provider" in
-    acr)
-      save_acr_cache "$cache_key"
-      ;;
     ecr)
       save_ecr_cache "$cache_key"
       ;;

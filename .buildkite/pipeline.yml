@@ -1,13 +1,13 @@
 steps:
   - label: ":shell: Tests"
     plugins:
-      - plugin-tester#v1.2.0:
+      - plugin-tester#v4.2.0:
           folders:
             - tests
 
   - label: ":sparkles: Lint"
     plugins:
-      - plugin-linter#v3.3.0:
+      - plugin-linter#v2.1.0:
           id: template
 
   - label: ":shell: Shellcheck"

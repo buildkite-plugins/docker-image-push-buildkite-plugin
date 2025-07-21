@@ -1,8 +1,8 @@
 #!/bin/bash
 
 setup_gar_environment() {
-  local project="${BUILDKITE_PLUGIN_DOCKER_CACHE_GAR_PROJECT:-}"
-  local region="${BUILDKITE_PLUGIN_DOCKER_CACHE_GAR_REGION:-us}"
+  local project="${BUILDKITE_PLUGIN_DOCKER_PUSH_GAR_PROJECT:-}"
+  local region="${BUILDKITE_PLUGIN_DOCKER_PUSH_GAR_REGION:-us}"
 
   if ! command_exists gcloud; then
     log_error "Google Cloud SDK is required for GAR provider"
@@ -37,50 +37,4 @@ setup_gar_environment() {
   fi
 }
 
-restore_gar_cache() {
-  local cache_key="$1"
-  local cache_image
 
-  cache_image=$(build_cache_image_name "gar" "$cache_key")
-
-  if image_exists_in_registry "$cache_image"; then
-    log_info "Cache hit! Restoring from $cache_image"
-    if pull_image "$cache_image"; then
-      tag_image "$cache_image" "${BUILDKITE_PLUGIN_DOCKER_CACHE_IMAGE}"
-      log_success "Cache restored successfully from GAR"
-      return 0
-    else
-      log_warning "Failed to pull cache image from GAR"
-      return 1
-    fi
-  else
-    log_info "Cache miss. No cached image found for key $cache_key in GAR. Proceeding without cache."
-    return 0
-  fi
-}
-
-save_gar_cache() {
-  local cache_key="$1"
-  local cache_image
-  local source_image="${BUILDKITE_PLUGIN_DOCKER_CACHE_IMAGE}"
-
-  cache_image=$(build_cache_image_name "gar" "$cache_key")
-
-  if ! image_exists_locally "$source_image"; then
-    log_error "Source image not found locally: $source_image"
-    return 1
-  fi
-
-  if tag_image "$source_image" "$cache_image"; then
-    if push_image "$cache_image"; then
-      log_success "Cache saved successfully to GAR: $cache_image"
-      return 0
-    else
-      log_error "Failed to save cache to GAR"
-      return 1
-    fi
-  else
-    log_error "Failed to tag cache image for GAR"
-    return 1
-  fi
-}

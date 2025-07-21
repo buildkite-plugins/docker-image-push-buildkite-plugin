@@ -1,5 +1,5 @@
-name: Docker-Cache
-description: Cache Docker images across builds using various registry providers (ECR, GAR, Docker Hub, etc.)
+name: Docker-Push
+description: Push Docker images to ECR (AWS) or GAR (Google Artifact Registry)
 author: https://github.com/buildkite-plugins
 requirements:
   - bash
@@ -8,26 +8,15 @@ configuration:
   properties:
     provider:
       type: string
-      enum: [ecr, gar, dockerhub]
+      enum: [ecr, gar]
       description: Registry provider type
     image:
       type: string
-      description: Docker image name to cache
-    cache-key:
-      type: [string, array]
-      description: Cache key components
-    save:
-      type: boolean
-      description: Whether to save cache after build
-      default: true
-    restore:
-      type: boolean
-      description: Whether to restore cache before build
-      default: true
+      description: Docker image name to push
     tag:
       type: string
-      description: Tag for the cached image
-      default: "cache"
+      description: Tag for the image
+      default: "latest"
     ecr:
       type: object
       description: ECR-specific configuration
@@ -57,20 +46,9 @@ configuration:
           type: string
           description: Artifact Registry repository name (defaults to the image name when omitted)
       additionalProperties: false
-    dockerhub:
-      type: object
-      description: Docker Hub configuration
-      properties:
-        username:
-          type: string
-          description: Docker Hub username
-        repository:
-          type: string
-          description: Docker Hub repository name
-      additionalProperties: false
     verbose:
       type: boolean
-      description: Enable verbose logging
+      description: Enable verbose logging and debug mode (set -x)
       default: false
   required:
     - provider

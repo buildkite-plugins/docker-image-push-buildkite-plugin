@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Shared utility functions for the Docker cache plugin
+# Shared utility functions for the Docker push plugin
 
 set -euo pipefail
 
@@ -25,7 +25,6 @@ command_exists() {
 }
 
 unknown_provider() {
-  local provider="$1"
   log_error "Unknown provider: $1"
   exit 1
 }
@@ -37,7 +36,7 @@ check_dependencies() {
     missing_deps+=("docker")
   fi
 
-  case "${BUILDKITE_PLUGIN_DOCKER_CACHE_PROVIDER}" in
+  case "${BUILDKITE_PLUGIN_DOCKER_PUSH_PROVIDER}" in
     ecr)
       if ! command_exists aws; then
         missing_deps+=("aws")
@@ -57,79 +56,17 @@ check_dependencies() {
   fi
 }
 
-build_cache_image_name() {
-  local provider="$1"
-  local cache_key="$2"
-  local base_image="${BUILDKITE_PLUGIN_DOCKER_CACHE_IMAGE}"
-  # Use tag from config or default to "cache" if unset
-  local tag="${BUILDKITE_PLUGIN_DOCKER_CACHE_TAG:-cache}"
 
-  case "$provider" in
-    ecr)
-      local registry_url="${DOCKER_CACHE_ECR_REGISTRY_URL}"
-      echo "${registry_url}/${base_image}:${tag}-${cache_key}"
-      ;;
-    gar)
-      local project="${BUILDKITE_PLUGIN_DOCKER_CACHE_GAR_PROJECT}"
-      local region="${BUILDKITE_PLUGIN_DOCKER_CACHE_GAR_REGION:-us}"
-      local repository="${BUILDKITE_PLUGIN_DOCKER_CACHE_GAR_REPOSITORY:-${base_image}}"
-      if [[ "${region}" =~ \.pkg\.dev$ ]]; then
-        # Google Artifact Registry host already specified
-        echo "${region}/${project}/${repository}/${base_image}:${tag}-${cache_key}"
-      else
-        echo "${region}.gar.io/${project}/${repository}/${base_image}:${tag}-${cache_key}"
-      fi
-      ;;
-    dockerhub)
-      local username="${BUILDKITE_PLUGIN_DOCKER_CACHE_DOCKERHUB_USERNAME}"
-      local repository="${BUILDKITE_PLUGIN_DOCKER_CACHE_DOCKERHUB_REPOSITORY:-${base_image}}"
-      echo "${username}/${repository}:${tag}-${cache_key}"
-      ;;
-    *)
-      log_error "Unknown provider: $provider"
-      exit 1
-      ;;
-  esac
-}
-
-image_exists_locally() {
-  local image="$1"
-  docker image inspect "$image" >/dev/null 2>&1
-}
-
-image_exists_in_registry() {
-  local image="$1"
-
-  if [[ "${BUILDKITE_PLUGIN_DOCKER_CACHE_VERBOSE}" == "true" ]]; then
-    log_info "Checking if image exists in registry: $image"
-  fi
-
-  # Try to pull manifest without downloading the image
-  docker manifest inspect "$image" >/dev/null 2>&1
-}
-
-pull_image() {
-  local image="$1"
-
-  log_info "Pulling image: $image"
-  if docker pull "$image"; then
-    log_success "Successfully pulled cache image"
-    return 0
-  else
-    log_warning "Failed to pull cache image"
-    return 1
-  fi
-}
 
 push_image() {
   local image="$1"
 
   log_info "Pushing image: $image"
   if docker push "$image"; then
-    log_success "Successfully pushed cache image"
+    log_success "Successfully pushed image"
     return 0
   else
-    log_error "Failed to push cache image"
+    log_error "Failed to push image"
     return 1
   fi
 }

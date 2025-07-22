@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Enable debug mode if requested
-if [[ "${BUILDKITE_PLUGIN_DOCKER_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
+if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
   echo "~~~ :hammer: Enabling debug mode"
   set -x
 fi
@@ -15,8 +15,8 @@ main() {
   echo "--- :docker: Setting up Docker push environment"
   log_info "Setting up Docker push environment"
 
-  local provider="${BUILDKITE_PLUGIN_DOCKER_PUSH_PROVIDER:-}"
-  local image="${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE:-}"
+  local provider="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER:-}"
+  local image="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE:-}"
 
   if [[ -z "$provider" ]]; then
     log_error "provider is required"

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Enable debug mode if requested
-if [[ "${BUILDKITE_PLUGIN_DOCKER_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
+if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
   echo "~~~ :hammer: Enabling debug mode"
   set -x
 fi
@@ -18,9 +18,9 @@ main() {
   # Ensure required CLIs are available
   check_dependencies
 
-  local provider="${BUILDKITE_PLUGIN_DOCKER_PUSH_PROVIDER:-}"
-  local image="${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE:-}"
-  local tag="${BUILDKITE_PLUGIN_DOCKER_PUSH_TAG:-latest}"
+  local provider="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER:-}"
+  local image="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE:-}"
+  local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
 
   if [[ -z "$provider" || -z "$image" ]]; then
     log_error "provider and image must be specified"

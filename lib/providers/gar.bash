@@ -1,8 +1,8 @@
 #!/bin/bash
 
 setup_gar_environment() {
-  local project="${BUILDKITE_PLUGIN_DOCKER_PUSH_GAR_PROJECT:-}"
-  local region="${BUILDKITE_PLUGIN_DOCKER_PUSH_GAR_REGION:-us}"
+  local project="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_GAR_PROJECT:-}"
+  local region="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_GAR_REGION:-us}"
 
   if ! command_exists gcloud; then
     log_error "Google Cloud SDK is required for GAR provider"
@@ -36,10 +36,10 @@ setup_gar_environment() {
 
   log_success "Successfully authenticated with ${registry_host}"
 
-  local repository="${BUILDKITE_PLUGIN_DOCKER_PUSH_GAR_REPOSITORY:-${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE}}"
-  local tag="${BUILDKITE_PLUGIN_DOCKER_PUSH_TAG:-latest}"
+  local repository="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_GAR_REPOSITORY:-${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE}}"
+  local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
 
-  export DOCKER_PUSH_REMOTE_IMAGE="${registry_host}/${project}/${repository}/${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE}:${tag}"
+  export DOCKER_PUSH_REMOTE_IMAGE="${registry_host}/${project}/${repository}/${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE}:${tag}"
 }
 
 

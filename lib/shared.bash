@@ -36,7 +36,7 @@ check_dependencies() {
     missing_deps+=("docker")
   fi
 
-  case "${BUILDKITE_PLUGIN_DOCKER_PUSH_PROVIDER}" in
+  case "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER}" in
     ecr)
       if ! command_exists aws; then
         missing_deps+=("aws")

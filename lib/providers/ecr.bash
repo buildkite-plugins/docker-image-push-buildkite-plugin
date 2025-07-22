@@ -3,9 +3,9 @@
 # AWS ECR provider for Docker push plugin
 
 setup_ecr_environment() {
-  local region="${BUILDKITE_PLUGIN_DOCKER_PUSH_ECR_REGION:-}"
-  local account_id="${BUILDKITE_PLUGIN_DOCKER_PUSH_ECR_ACCOUNT_ID:-}"
-  local registry_url="${BUILDKITE_PLUGIN_DOCKER_PUSH_ECR_REGISTRY_URL:-}"
+  local region="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ECR_REGION:-}"
+  local account_id="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ECR_ACCOUNT_ID:-}"
+  local registry_url="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ECR_REGISTRY_URL:-}"
 
   if ! command_exists aws; then
     log_error "AWS CLI is required for ECR provider"
@@ -16,7 +16,7 @@ setup_ecr_environment() {
     region=$(aws configure get region 2>/dev/null || echo "us-east-1")
     log_info "Using AWS region: $region"
   fi
-  export BUILDKITE_PLUGIN_DOCKER_PUSH_ECR_REGION="$region"
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ECR_REGION="$region"
 
   if [[ -z "$account_id" ]]; then
     log_info "Auto-detecting AWS account ID..."
@@ -27,7 +27,7 @@ setup_ecr_environment() {
     fi
     log_info "Using AWS account ID: $account_id"
   fi
-  export BUILDKITE_PLUGIN_DOCKER_PUSH_ECR_ACCOUNT_ID="$account_id"
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ECR_ACCOUNT_ID="$account_id"
 
   if [[ -z "$registry_url" ]]; then
     registry_url="${account_id}.dkr.ecr.${region}.amazonaws.com"
@@ -44,6 +44,6 @@ setup_ecr_environment() {
 
   log_success "Successfully authenticated with ECR"
 
-    local tag="${BUILDKITE_PLUGIN_DOCKER_PUSH_TAG:-latest}"
-  export DOCKER_PUSH_REMOTE_IMAGE="${registry_url}/${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE}:${tag}"
+    local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
+  export DOCKER_PUSH_REMOTE_IMAGE="${registry_url}/${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE}:${tag}"
 }

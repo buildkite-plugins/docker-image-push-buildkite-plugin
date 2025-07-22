@@ -1,4 +1,4 @@
-# Docker Push Buildkite Plugin
+# Docker Image Push Buildkite Plugin
 
 A Buildkite plugin to build and push Docker images to a variety of container registries.
 
@@ -68,11 +68,12 @@ This example pushes an image to an ECR repository.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-push#v1.0.0:
+      - docker-image-push#v1.0.0:
           provider: ecr
           image: my-app
-          region: us-east-1
-          registry-url: 123456789012.dkr.ecr.us-east-1.amazonaws.com
+          ecr:
+            region: us-east-1
+            registry-url: 123456789012.dkr.ecr.us-east-1.amazonaws.com
 ```
 
 ### Push to Google Artifact Registry
@@ -83,13 +84,14 @@ This example pushes an image to a GAR repository with a specific tag.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-push#v1.0.0:
+      - docker-image-push#v1.0.0:
           provider: gar
           image: my-app
           tag: "v1.2.3"
-          project: my-gcp-project
-          region: australia-southeast1
-          repository: my-docker-repo
+          gar:
+            project: my-gcp-project
+            region: australia-southeast1
+            repository: my-docker-repo
 ```
 
 ### Verbose Mode

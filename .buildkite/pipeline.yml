@@ -8,7 +8,7 @@ steps:
   - label: ":sparkles: Lint"
     plugins:
       - plugin-linter#v3.3.0:
-          id: template
+          id: docker-push
 
   - label: ":shell: Shellcheck"
     plugins:

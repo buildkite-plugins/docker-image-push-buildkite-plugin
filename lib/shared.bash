@@ -59,10 +59,18 @@ check_dependencies() {
 
 
 push_image() {
-  local image="$1"
+  local local_image="$1"
+  local remote_image="${DOCKER_PUSH_REMOTE_IMAGE:-}"
 
-  log_info "Pushing image: $image"
-  if docker push "$image"; then
+  if [[ -z "${remote_image}" ]]; then
+    log_error "DOCKER_PUSH_REMOTE_IMAGE is not set. Cannot push."
+    exit 1
+  fi
+
+  tag_image "${local_image}" "${remote_image}"
+
+  log_info "Pushing image: ${remote_image}"
+  if docker push "${remote_image}"; then
     log_success "Successfully pushed image"
     return 0
   else

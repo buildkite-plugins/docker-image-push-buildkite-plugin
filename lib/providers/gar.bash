@@ -29,12 +29,17 @@ setup_gar_environment() {
   fi
 
   log_info "Authenticating with registry: ${registry_host}"
-  if gcloud auth configure-docker "${registry_host}" --quiet; then
-    log_success "Successfully authenticated with ${registry_host}"
-  else
+  if ! gcloud auth configure-docker "${registry_host}" --quiet; then
     log_error "Failed to authenticate with ${registry_host}"
     exit 1
   fi
+
+  log_success "Successfully authenticated with ${registry_host}"
+
+  local repository="${BUILDKITE_PLUGIN_DOCKER_PUSH_GAR_REPOSITORY:-${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE}}"
+  local tag="${BUILDKITE_PLUGIN_DOCKER_PUSH_TAG:-latest}"
+
+  export DOCKER_PUSH_REMOTE_IMAGE="${registry_host}/${project}/${repository}/${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE}:${tag}"
 }
 
 

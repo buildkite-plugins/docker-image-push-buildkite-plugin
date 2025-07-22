@@ -37,12 +37,13 @@ setup_ecr_environment() {
   log_info "ECR registry URL: $registry_url"
 
   log_info "Authenticating with ECR..."
-  if aws ecr get-login-password --region "$region" | docker login --username AWS --password-stdin "$registry_url"; then
-    log_success "Successfully authenticated with ECR"
-  else
+  if ! aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${registry_url}"; then
     log_error "Failed to authenticate with ECR"
     exit 1
   fi
+
+  log_success "Successfully authenticated with ECR"
+
+    local tag="${BUILDKITE_PLUGIN_DOCKER_PUSH_TAG:-latest}"
+  export DOCKER_PUSH_REMOTE_IMAGE="${registry_url}/${BUILDKITE_PLUGIN_DOCKER_PUSH_IMAGE}:${tag}"
 }
-
-

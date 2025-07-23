@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+
+# Enable debug mode if requested
+if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
+  echo "~~~ :hammer: Enabling debug mode"
+  set -x
+fi
+
+# Load plugin library
+# shellcheck source=lib/plugin.bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/plugin.bash"
+
+main() {
+  echo "--- :docker: Pushing Docker image"
+  log_info "Pushing Docker image"
+
+  # Ensure required CLIs are available
+  check_dependencies
+
+  local provider="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER:-}"
+  local image="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE:-}"
+  local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
+
+  if [[ -z "$provider" || -z "$image" ]]; then
+    log_error "provider and image must be specified"
+    exit 1
+  fi
+
+  # Authenticate with registry
+  setup_provider_environment "$provider"
+
+  local full_image="${image}:${tag}"
+  log_info "Pushing ${full_image}"
+
+  if push_image "${full_image}"; then
+    log_success "Image pushed successfully: ${full_image}"
+  else
+    log_error "Failed to push image"
+    exit 1
+  fi
+}
+
+main "$@"

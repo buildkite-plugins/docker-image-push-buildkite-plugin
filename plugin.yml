@@ -1,14 +1,56 @@
-name: Buildkite Plugin
-description: Exceptional functionality
+name: Docker Image Push
+description: Push Docker images to ECR (AWS) or GAR (Google Artifact Registry)
 author: https://github.com/buildkite-plugins
 requirements:
   - bash
+  - docker
 configuration:
   properties:
-    mandatory:
+    provider:
       type: string
-    optional:
+      enum: [ecr, gar]
+      description: Registry provider type
+    image:
       type: string
+      description: Docker image name to push
+    tag:
+      type: string
+      description: Tag for the image
+      default: "latest"
+    ecr:
+      type: object
+      description: ECR-specific configuration
+      properties:
+        region:
+          type: string
+          description: AWS region for ECR registry
+        account-id:
+          type: string
+          description: AWS account ID
+        registry-url:
+          type: string
+          description: ECR registry URL
+      additionalProperties: false
+    gar:
+      type: object
+      description: GAR-specific configuration
+      properties:
+        project:
+          type: string
+          description: Google Cloud project ID
+        region:
+          type: string
+          description: GAR region (e.g. "us") or full GAR host (e.g. "europe-west10-docker.pkg.dev")
+          default: "us"
+        repository:
+          type: string
+          description: Artifact Registry repository name (defaults to the image name when omitted)
+      additionalProperties: false
+    verbose:
+      type: boolean
+      description: Enable verbose logging and debug mode (set -x)
+      default: false
   required:
-    - mandatory
+    - provider
+    - image
   additionalProperties: false

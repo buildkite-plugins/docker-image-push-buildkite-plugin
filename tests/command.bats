@@ -2,39 +2,57 @@
 
 setup() {
   load "${BATS_PLUGIN_PATH}/load.bash"
-
-  # Uncomment to enable stub debugging
-  # export CURL_STUB_DEBUG=/dev/tty
-
-  # you can set variables common to all tests here
-  export BUILDKITE_PLUGIN_YOUR_PLUGIN_NAME_MANDATORY='Value'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG='test-tag'
 }
 
-@test "Missing mandatory option fails" {
-  unset BUILDKITE_PLUGIN_YOUR_PLUGIN_NAME_MANDATORY
-
-  run "$PWD"/hooks/command
-
+@test "Fails if provider is missing" {
+  unset BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER
+  run "$PWD"/hooks/environment
   assert_failure
-  assert_output --partial 'Missing mandatory option'
-  refute_output --partial 'Running plugin'
+  assert_output --partial 'provider is required'
 }
 
-@test "Normal basic operations" {
-
-  run "$PWD"/hooks/command
-
-  assert_success
-  assert_output --partial 'Running plugin with options'
-  assert_output --partial '- mandatory: Value'
+@test "Fails if image is missing" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='ecr'
+  unset BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'image is required'
 }
 
-@test "Optional value changes bejaviour" {
-  export BUILDKITE_PLUGIN_YOUR_PLUGIN_NAME_OPTIONAL='other value'
+@test "ECR provider requires AWS CLI" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='ecr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ECR_REGION='us-west-2'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'AWS CLI is required'
+}
 
-  run "$PWD"/hooks/command
+@test "GAR provider requires gcloud" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='gar'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_GAR_PROJECT='test-project'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'Google Cloud SDK is required'
+}
 
-  assert_success
-  assert_output --partial 'Running plugin with options'
-  assert_output --partial '- optional: other value'
+@test "Fails on unsupported provider" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='unknown'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'unsupported provider'
+}
+
+@test "Verbose mode enables debug output" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='ecr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE='true'
+  run "$PWD"/hooks/environment
+  assert_failure  # Expected to fail due to missing AWS CLI
+  assert_output --partial 'Enabling debug mode'
+  assert_output --partial '+ echo'
 }

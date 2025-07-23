@@ -1,4 +1,4 @@
-name: Docker-Push
+name: Docker Image Push
 description: Push Docker images to ECR (AWS) or GAR (Google Artifact Registry)
 author: https://github.com/buildkite-plugins
 requirements:

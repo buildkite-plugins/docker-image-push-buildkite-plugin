@@ -111,7 +111,7 @@ steps:
 
 | Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |
 | :-----------: | :-------------: | :----: | :----: |:---- |
-| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli` or `gcloud` for ECR and GAR (Google Artifact Store) respectively<br/>**K8s & Hosted (Linux)** - `mnt-ssh-agent` attribute in the plugin requires ssh-agent to be running before the plugin's command hook is started<br>**K8s** - if the `propagate-environment: true` attribute in the plugin is set, this requires extra volume mounts. Refer to  the example in docker.yaml<br>**Hosted (Mac)** - Docker engine not available |
+| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli` or `gcloud` for ECR and GAR (Google Artifact Store) respectively<br/>**Hosted (Mac)** - Docker engine not available |
 
 - ✅ Fully supported (all combinations of attributes have been tested to pass)
 - ⚠️ Partially supported (some combinations cause errors/issues)

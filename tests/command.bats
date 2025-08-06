@@ -39,6 +39,24 @@ setup() {
   assert_output --partial 'Google Cloud SDK is required'
 }
 
+@test "Depot provider requires access token when not using OIDC" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='depot'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_DEPOT_PROJECT_ID='test-project'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'depot access-token is required when not using OIDC'
+}
+
+@test "Depot provider requires project ID" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='depot'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_DEPOT_ACCESS_TOKEN='test-token'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'depot project-id is required'
+}
+
 @test "Fails on unsupported provider" {
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='unknown'
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'

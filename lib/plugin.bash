@@ -9,6 +9,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/shared.bash"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/ecr.bash"
 # shellcheck source=lib/providers/gar.bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/gar.bash"
+# shellcheck source=lib/providers/depot.bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/depot.bash"
 
 setup_provider_environment() {
   local provider="$1"
@@ -19,6 +21,9 @@ setup_provider_environment() {
       ;;
     gar)
       setup_gar_environment
+      ;;
+    depot)
+      setup_depot_environment
       ;;
 
     *)

@@ -13,7 +13,6 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/plugin.bash"
 
 main() {
   echo "--- :docker: Pushing Docker image"
-  log_info "Pushing Docker image"
 
   # Ensure required CLIs are available
   check_dependencies
@@ -31,14 +30,26 @@ main() {
   setup_provider_environment "$provider"
 
   local full_image="${image}:${tag}"
-  log_info "Pushing ${full_image}"
 
-  if push_image "${full_image}"; then
-    log_success "Image pushed successfully: ${full_image}"
-  else
-    log_error "Failed to push image"
-    exit 1
-  fi
+  case "$provider" in
+    depot)
+      if build_and_push_depot_image "${full_image}"; then
+        log_success "Image built and pushed successfully: ${full_image}"
+      else
+        log_error "Failed to build and push image using Depot"
+        exit 1
+      fi
+      ;;
+    *)
+      # Use standard docker push for other providers
+      if push_image "${full_image}"; then
+        log_success "Image pushed successfully: ${full_image}"
+      else
+        log_error "Failed to push image"
+        exit 1
+      fi
+      ;;
+  esac
 }
 
 main "$@"

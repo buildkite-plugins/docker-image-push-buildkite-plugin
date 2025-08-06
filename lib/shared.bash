@@ -47,6 +47,11 @@ check_dependencies() {
         missing_deps+=("gcloud")
       fi
       ;;
+    depot)
+      if ! command_exists depot; then
+        missing_deps+=("depot")
+      fi
+      ;;
   esac
 
   if [[ ${#missing_deps[@]} -gt 0 ]]; then

@@ -75,6 +75,14 @@ The depot.dev access token, required when not using OIDC.
 
 Enable OIDC authentication.
 
+#### `context` (string, default: `.`)
+
+The build context path (defaults to current directory).
+
+#### `platform` (string)
+
+The target platform for the build (e.g., `linux/amd64`, `linux/arm64`).
+
 ## Examples
 
 ### Push to Amazon ECR

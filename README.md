@@ -111,7 +111,7 @@ steps:
 
 | Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |
 | :-----------: | :-------------: | :----: | :----: |:---- |
-| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli` or `gcloud` for ECR and GAR (Google Artifact Store) respectively<br/>**Hosted (Mac)** - Docker engine not available |
+| ✅ |  ⚠️ | ❌ (except Depot) | ⚠️ | **All** – Requires `awscli`, `gcloud`, `depot` for ECR, GAR (Google Artifact Store) and Depot respectively<br/>**Hosted (Mac)** - Docker engine not available – not needed for Depot as builds run on depot.dev runners |
 
 - ✅ Fully supported (all combinations of attributes have been tested to pass)
 - ⚠️ Partially supported (some combinations cause errors/issues)

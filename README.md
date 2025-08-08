@@ -14,7 +14,7 @@ These are all the options available to configure this plugin's behaviour.
 
 #### `provider` (string)
 
-The registry provider to use. Supported values: `ecr`, `gar`.
+The registry provider to use. Supported values: `ecr`, `gar`, `depot`.
 
 #### `image` (string)
 
@@ -57,6 +57,23 @@ The GAR region (e.g., `us-east1`) or a full GAR hostname (e.g., `europe-west10-d
 #### `repository` (string)
 
 The name of the Artifact Registry repository. If omitted, it defaults to the image name.
+
+
+### Depot Provider Options
+
+**Note:** Authentication, container build and push is handled by the `depot` CLI. Ensure your Buildkite agent has authenticated with depot.dev before running this plugin (e.g., using a service account key or Workload Identity Federation).
+
+#### `project-id` (string)
+
+The depot.dev project ID.
+
+#### `access-token` (string)
+
+The depot.dev access token, required when not using OIDC.
+
+#### `oidc` (boolean, default: `false`)
+
+Enable OIDC authentication.
 
 ## Examples
 

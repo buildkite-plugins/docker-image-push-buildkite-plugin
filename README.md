@@ -94,6 +94,57 @@ steps:
             repository: my-docker-repo
 ```
 
+### Push to depot.dev
+
+#### Using OIDC Authentication (Recommended), see [Depot.dev documentation](https://depot.dev/docs/cli/authentication#adding-a-trust-relationship-for-buildkite)
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.0.1:
+          provider: depot
+          image: my-app
+          tag: "v1.2.3"
+          depot:
+            project-id: "$$DEPOT_DEV_PROJECT_ID"
+            oidc: true
+```
+
+#### Using Access Token Authentication
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.0.1:
+          provider: depot
+          image: my-app
+          tag: "v1.2.3"
+          depot:
+            access-token: "$$DEPOT_DEV_TOKEN"
+            project-id: "$$DEPOT_DEV_PROJECT_ID"
+```
+
+##### With fetching secrets from Buildkite secrets
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - secrets#v1.0.0:
+          variables:
+            DEPOT_DEV_PROJECT_ID: DEPOT_DEV_PROJECT_ID
+            DEPOT_DEV_TOKEN: DEPOT_DEV_TOKEN
+      - docker-image-push#v1.0.1:
+          provider: depot
+          image: my-app
+          tag: "v1.2.3"
+          depot:
+            access-token: "$$DEPOT_DEV_TOKEN"
+            project-id: "$$DEPOT_DEV_PROJECT_ID"
+```
+
 ### Verbose Mode
 
 Enable verbose mode for detailed debug output.

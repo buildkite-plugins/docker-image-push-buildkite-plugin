@@ -5,6 +5,7 @@ A Buildkite plugin to build and push Docker images to a variety of container reg
 Supported providers:
 - Amazon Elastic Container Registry (ECR)
 - Google Artifact Registry (GAR)
+- Buildkite Packages Container Registry
 
 ## Options
 
@@ -14,7 +15,7 @@ These are all the options available to configure this plugin's behaviour.
 
 #### `provider` (string)
 
-The registry provider to use. Supported values: `ecr`, `gar`.
+The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`.
 
 #### `image` (string)
 
@@ -58,6 +59,29 @@ The GAR region (e.g., `us-east1`) or a full GAR hostname (e.g., `europe-west10-d
 
 The name of the Artifact Registry repository. If omitted, it defaults to the image name.
 
+### Buildkite Packages Provider Options
+
+**Note:** Authentication requires either a Buildkite API token with Read Packages and Write Packages scopes, or OIDC authentication using `buildkite-agent` (available in Buildkite pipeline jobs).
+
+#### `org-slug` (string)
+
+The Buildkite organization slug. If omitted, it will use the `BUILDKITE_ORGANIZATION_SLUG` environment variable.
+
+#### `registry-slug` (string)
+
+The container registry slug. If omitted, it defaults to the image name.
+
+#### `auth-method` (string, default: `api-token`)
+
+Authentication method to use. Supported values: `api-token`, `oidc`.
+
+- `api-token`: Uses the `api-token` parameter or falls back to `BUILDKITE_API_TOKEN` environment variable
+- `oidc`: Uses `buildkite-agent oidc request-token` command (available in pipeline jobs)
+
+#### `api-token` (string)
+
+The Buildkite API token with Read Packages and Write Packages scopes. Required when `auth-method` is `api-token`. Can also be provided via the `BUILDKITE_API_TOKEN` environment variable for backward compatibility.
+
 ## Examples
 
 ### Push to Amazon ECR
@@ -94,6 +118,40 @@ steps:
             repository: my-docker-repo
 ```
 
+### Push to Buildkite Packages Container Registry
+
+This example pushes an image to Buildkite Packages using API token authentication.
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.0.1:
+          provider: buildkite
+          image: my-app
+          tag: "v1.2.3"
+          buildkite:
+            org-slug: my-org
+            registry-slug: my-container-registry
+            api-token: your-api-token-here
+```
+
+### Push to Buildkite Packages with OIDC
+
+This example uses OIDC authentication (recommended for Buildkite pipelines).
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.0.1:
+          provider: buildkite
+          image: my-app
+          buildkite:
+            org-slug: my-org
+            auth-method: oidc
+```
+
 ### Verbose Mode
 
 Enable verbose mode for detailed debug output.
@@ -102,7 +160,7 @@ Enable verbose mode for detailed debug output.
 steps:
   - label: ":docker: Build and Push (Debug)"
     plugins:
-      - docker-push#v1.0.0:
+      - docker-image-push#v1.0.0:
           provider: ecr
           image: my-app
           verbose: true
@@ -111,7 +169,7 @@ steps:
 
 | Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |
 | :-----------: | :-------------: | :----: | :----: |:---- |
-| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli` or `gcloud` for ECR and GAR (Google Artifact Store) respectively<br/>**Hosted (Mac)** - Docker engine not available |
+| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli` or `gcloud` for ECR and GAR respectively. Buildkite Packages only requires `docker`<br/>**Hosted (Mac)** - Docker engine not available |
 
 - ✅ Fully supported (all combinations of attributes have been tested to pass)
 - ⚠️ Partially supported (some combinations cause errors/issues)

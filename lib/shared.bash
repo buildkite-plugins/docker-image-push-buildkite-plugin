@@ -47,6 +47,10 @@ check_dependencies() {
         missing_deps+=("gcloud")
       fi
       ;;
+    buildkite)
+      # No additional CLI dependencies required for Buildkite Packages
+      # buildkite-agent is always available in Buildkite pipeline jobs
+      ;;
   esac
 
   if [[ ${#missing_deps[@]} -gt 0 ]]; then

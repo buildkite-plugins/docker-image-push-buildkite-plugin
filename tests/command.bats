@@ -39,6 +39,46 @@ setup() {
   assert_output --partial 'Google Cloud SDK is required'
 }
 
+@test "Buildkite provider requires organization slug" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='buildkite'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  unset BUILDKITE_ORGANIZATION_SLUG
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'organization slug is required'
+}
+
+@test "Buildkite provider with API token auth requires token" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='buildkite'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_BUILDKITE_ORG_SLUG='test-org'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_BUILDKITE_AUTH_METHOD='api-token'
+  unset BUILDKITE_API_TOKEN
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'API token is required for api-token authentication'
+}
+
+@test "Buildkite provider with OIDC auth uses buildkite-agent" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='buildkite'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_BUILDKITE_ORG_SLUG='test-org'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_BUILDKITE_AUTH_METHOD='oidc'
+  run "$PWD"/hooks/environment
+  assert_failure  # Expected to fail at buildkite-agent command (not available in test env)
+  assert_output --partial 'Requesting OIDC token for audience'
+}
+
+@test "Buildkite provider uses organization slug from environment" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='buildkite'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_ORGANIZATION_SLUG='env-org'
+  export BUILDKITE_API_TOKEN='test-token'
+  run "$PWD"/hooks/environment
+  assert_failure  # Expected to fail at docker login (no real docker in test)
+  assert_output --partial 'Using organization slug from environment: env-org'
+}
+
 @test "Fails on unsupported provider" {
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='unknown'
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'

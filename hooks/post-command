@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Enable debug mode if requested
-if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
+if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]]; then
   echo "~~~ :hammer: Enabling debug mode"
   set -x
 fi

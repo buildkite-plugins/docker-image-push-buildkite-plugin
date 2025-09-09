@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Enable debug mode if requested
-if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]] ; then
+if [[ "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_VERBOSE:-false}" =~ (true|on|1) ]]; then
   echo "~~~ :hammer: Enabling debug mode"
   set -x
 fi
@@ -32,13 +32,12 @@ main() {
   log_info "Image - $image"
 
   case "$provider" in
-    ecr|gar|buildkite)
-      ;;
-    *)
-      log_error "unsupported provider '$provider'"
-      log_info "Supported providers: ecr, gar, buildkite"
-      exit 1
-      ;;
+  ecr | gar | buildkite | artifactory) ;;
+  *)
+    log_error "unsupported provider '$provider'"
+    log_info "Supported providers: ecr, gar, buildkite, artifactory"
+    exit 1
+    ;;
   esac
 
   # Authenticate with registry

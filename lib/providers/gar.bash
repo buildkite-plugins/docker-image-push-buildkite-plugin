@@ -41,5 +41,3 @@ setup_gar_environment() {
 
   export DOCKER_PUSH_REMOTE_IMAGE="${registry_host}/${project}/${repository}/${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE}:${tag}"
 }
-
-

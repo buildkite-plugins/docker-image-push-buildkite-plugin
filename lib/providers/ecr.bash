@@ -44,6 +44,6 @@ setup_ecr_environment() {
 
   log_success "Successfully authenticated with ECR"
 
-    local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
+  local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
   export DOCKER_PUSH_REMOTE_IMAGE="${registry_url}/${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE}:${tag}"
 }

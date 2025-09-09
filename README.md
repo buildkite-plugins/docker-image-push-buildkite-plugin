@@ -6,6 +6,7 @@ Supported providers:
 - Amazon Elastic Container Registry (ECR)
 - Google Artifact Registry (GAR)
 - Buildkite Packages Container Registry
+- Artifactory Docker Registry
 
 ## Options
 
@@ -15,7 +16,7 @@ These are all the options available to configure this plugin's behaviour.
 
 #### `provider` (string)
 
-The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`.
+The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`, `artifactory`.
 
 #### `image` (string)
 
@@ -82,6 +83,22 @@ Authentication method to use. Supported values: `api-token`, `oidc`.
 
 The Buildkite API token with Read Packages and Write Packages scopes. Required when `auth-method` is `api-token`. Can also be provided via the `BUILDKITE_API_TOKEN` environment variable for backward compatibility.
 
+### Artifactory Provider Options
+
+**Note:** Authentication requires a username (typically email) and identity token from your Artifactory instance.
+
+#### `registry-url` (string)
+
+The Artifactory registry URL (e.g., `myjfroginstance.jfrog.io`). Do not include the protocol (`https://`).
+
+#### `username` (string)
+
+The username for Artifactory authentication, typically your email address.
+
+#### `identity-token` (string)
+
+The Artifactory identity token for authentication. Can reference an environment variable using `$VARIABLE_NAME` syntax.
+
 ## Examples
 
 ### Push to Amazon ECR
@@ -92,7 +109,7 @@ This example pushes an image to an ECR repository.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.0.0:
+      - docker-image-push#v1.0.1:
           provider: ecr
           image: my-app
           ecr:
@@ -108,7 +125,7 @@ This example pushes an image to a GAR repository with a specific tag.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.0.0:
+      - docker-image-push#v1.0.1:
           provider: gar
           image: my-app
           tag: "v1.2.3"
@@ -152,6 +169,24 @@ steps:
             auth-method: oidc
 ```
 
+### Push to Artifactory Docker Registry
+
+This example pushes an image to an Artifactory Docker registry.
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.0.1:
+          provider: artifactory
+          image: my-app
+          tag: "v1.2.3"
+          artifactory:
+            registry-url: myjfroginstance.jfrog.io
+            username: me@example.com
+            identity-token: $ARTIFACTORY_IDENTITY_TOKEN
+```
+
 ### Verbose Mode
 
 Enable verbose mode for detailed debug output.
@@ -160,7 +195,7 @@ Enable verbose mode for detailed debug output.
 steps:
   - label: ":docker: Build and Push (Debug)"
     plugins:
-      - docker-image-push#v1.0.0:
+      - docker-image-push#v1.0.1:
           provider: ecr
           image: my-app
           verbose: true

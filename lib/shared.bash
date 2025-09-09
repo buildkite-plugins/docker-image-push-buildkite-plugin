@@ -20,6 +20,37 @@ log_error() {
   echo "[ERROR]: $*" >&2
 }
 
+# Expand environment variables from plugin configuration values
+# Usage: expand_env_var "raw_value" "parameter_name"
+# Returns: expanded value or exits with error if variable is missing/empty
+expand_env_var() {
+  local raw_value="$1"
+  local param_name="$2"
+  local result
+
+  # shellcheck disable=SC2016
+  case "${raw_value}" in
+  '$'*)
+    local var_name="${raw_value#$}"
+    if [[ -v "${var_name}" ]]; then
+      result="${!var_name}"
+      if [[ -z "$result" ]]; then
+        log_error "Environment variable '${var_name}' referenced by ${param_name} parameter is empty or not set"
+        exit 1
+      fi
+    else
+      log_error "Environment variable '${var_name}' referenced by ${param_name} parameter is empty or not set"
+      exit 1
+    fi
+    ;;
+  *)
+    result="${raw_value}"
+    ;;
+  esac
+
+  echo "$result"
+}
+
 command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
@@ -37,20 +68,20 @@ check_dependencies() {
   fi
 
   case "${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER}" in
-    ecr)
-      if ! command_exists aws; then
-        missing_deps+=("aws")
-      fi
-      ;;
-    gar)
-      if ! command_exists gcloud; then
-        missing_deps+=("gcloud")
-      fi
-      ;;
-    buildkite)
-      # No additional CLI dependencies required for Buildkite Packages
-      # buildkite-agent is always available in Buildkite pipeline jobs
-      ;;
+  ecr)
+    if ! command_exists aws; then
+      missing_deps+=("aws")
+    fi
+    ;;
+  gar)
+    if ! command_exists gcloud; then
+      missing_deps+=("gcloud")
+    fi
+    ;;
+  buildkite)
+    # No additional CLI dependencies required for Buildkite Packages
+    # buildkite-agent is always available in Buildkite pipeline jobs
+    ;;
   esac
 
   if [[ ${#missing_deps[@]} -gt 0 ]]; then
@@ -59,8 +90,6 @@ check_dependencies() {
     exit 1
   fi
 }
-
-
 
 push_image() {
   local local_image="$1"

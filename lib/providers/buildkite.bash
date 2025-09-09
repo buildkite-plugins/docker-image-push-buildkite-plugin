@@ -31,17 +31,17 @@ setup_buildkite_environment() {
 
   # Authenticate with registry based on method
   case "$auth_method" in
-    api-token)
-      authenticate_with_api_token "$registry_url"
-      ;;
-    oidc)
-      authenticate_with_oidc "$registry_url"
-      ;;
-    *)
-      log_error "Unsupported authentication method: $auth_method"
-      log_info "Supported methods: api-token, oidc"
-      exit 1
-      ;;
+  api-token)
+    authenticate_with_api_token "$registry_url"
+    ;;
+  oidc)
+    authenticate_with_oidc "$registry_url"
+    ;;
+  *)
+    log_error "Unsupported authentication method: $auth_method"
+    log_info "Supported methods: api-token, oidc"
+    exit 1
+    ;;
   esac
 
   local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
@@ -51,18 +51,18 @@ setup_buildkite_environment() {
 authenticate_with_api_token() {
   local registry_url="$1"
   local api_token_raw="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_BUILDKITE_API_TOKEN:-}"
-  
+
   local api_token
   # Restrict environment variable expansion to safe, allow listed variables only
   # shellcheck disable=SC2016
   case "${api_token_raw}" in
-    '$CONTAINER_PACKAGE_REGISTRY_TOKEN'|'$BUILDKITE_API_TOKEN'|'$BUILDKITE_PLUGIN_'*)
-      local var_name="${api_token_raw#$}"
-      api_token="${!var_name}"
-      ;;
-    *)
-      api_token="${api_token_raw}"
-      ;;
+  '$CONTAINER_PACKAGE_REGISTRY_TOKEN' | '$BUILDKITE_API_TOKEN' | '$BUILDKITE_PLUGIN_'*)
+    local var_name="${api_token_raw#$}"
+    api_token="${!var_name}"
+    ;;
+  *)
+    api_token="${api_token_raw}"
+    ;;
   esac
 
   # Fallback to environment variable for backward compatibility
@@ -90,7 +90,7 @@ authenticate_with_api_token() {
 authenticate_with_oidc() {
   local registry_url="$1"
   local audience="https://${registry_url}"
-  
+
   log_info "Requesting OIDC token for audience: $audience"
   log_info "Authenticating with Buildkite Packages using OIDC..."
 

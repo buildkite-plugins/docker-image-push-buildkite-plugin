@@ -11,22 +11,27 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/ecr.bash"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/gar.bash"
 # shellcheck source=lib/providers/buildkite.bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/buildkite.bash"
+# shellcheck source=lib/providers/artifactory.bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/artifactory.bash"
 
 setup_provider_environment() {
   local provider="$1"
 
   case "$provider" in
-    ecr)
-      setup_ecr_environment
-      ;;
-    gar)
-      setup_gar_environment
-      ;;
-    buildkite)
-      setup_buildkite_environment
-      ;;
-    *)
-      unknown_provider "$provider"
-      ;;
+  ecr)
+    setup_ecr_environment
+    ;;
+  gar)
+    setup_gar_environment
+    ;;
+  buildkite)
+    setup_buildkite_environment
+    ;;
+  artifactory)
+    setup_artifactory_environment
+    ;;
+  *)
+    unknown_provider "$provider"
+    ;;
   esac
 }

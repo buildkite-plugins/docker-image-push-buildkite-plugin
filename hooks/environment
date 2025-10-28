@@ -32,10 +32,10 @@ main() {
   log_info "Image - $image"
 
   case "$provider" in
-  ecr | gar | buildkite | artifactory) ;;
+  ecr | gar | buildkite | artifactory | namespace) ;;
   *)
     log_error "unsupported provider '$provider'"
-    log_info "Supported providers: ecr, gar, buildkite, artifactory"
+    log_info "Supported providers: ecr, gar, buildkite, artifactory, namespace"
     exit 1
     ;;
   esac

@@ -13,6 +13,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/gar.bash"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/buildkite.bash"
 # shellcheck source=lib/providers/artifactory.bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/artifactory.bash"
+# shellcheck source=lib/providers/namespace.bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/namespace.bash"
 
 setup_provider_environment() {
   local provider="$1"
@@ -29,6 +31,9 @@ setup_provider_environment() {
     ;;
   artifactory)
     setup_artifactory_environment
+    ;;
+  namespace)
+    setup_namespace_environment
     ;;
   *)
     unknown_provider "$provider"

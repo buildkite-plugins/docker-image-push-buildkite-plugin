@@ -235,3 +235,28 @@ EOF
   assert_output --partial 'Authenticated with Namespace using AWS Cognito'
   assert_output --partial 'Namespace remote image: nscr.io/tenant123/test-image:test-tag'
 }
+
+@test "Namespace provider respects custom nsc binary" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='namespace'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_TENANT_ID='tenant123'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_AUTH_METHOD='aws-cognito'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_AWS_COGNITO_REGION='us-east-1'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_AWS_COGNITO_IDENTITY_POOL='pool-123'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_NSC_BINARY="$BATS_TEST_TMPDIR/bin/custom-nsc"
+
+  cat <<'EOF' >"$BATS_TEST_TMPDIR/bin/custom-nsc"
+#!/bin/bash
+if [[ "$1" == "auth" ]]; then
+  exit 0
+elif [[ "$1" == "docker" && "$2" == "login" ]]; then
+  exit 0
+fi
+echo "unexpected custom-nsc call: $*" >&2
+exit 1
+EOF
+  chmod +x "$BATS_TEST_TMPDIR/bin/custom-nsc"
+
+  run "$PWD"/hooks/environment
+  assert_success
+  assert_output --partial 'Namespace remote image: nscr.io/tenant123/test-image:test-tag'
+}

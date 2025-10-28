@@ -96,6 +96,9 @@ configuration:
         registry:
           type: string
           description: Namespace registry host (defaults to "nscr.io")
+        nsc-binary:
+          type: string
+          description: Path to Namespace CLI binary (defaults to /root/.ns/bin/nsc)
         auth-method:
           type: string
           enum: [buildkite-oidc, aws-cognito]

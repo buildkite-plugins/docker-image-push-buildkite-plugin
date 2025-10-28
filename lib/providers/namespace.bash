@@ -38,8 +38,14 @@ setup_namespace_environment() {
     fi
   fi
 
+  local tenant_slug="$tenant_id"
+  if [[ "$tenant_slug" == tenant_* ]]; then
+    tenant_slug="${tenant_slug#tenant_}"
+  fi
+
   log_info "Namespace registry host: ${registry}"
   log_info "Namespace tenant: ${tenant_id}"
+  log_info "Namespace registry slug: ${tenant_slug}"
   log_info "Namespace auth method: ${auth_method}"
 
   case "$auth_method" in
@@ -64,7 +70,7 @@ setup_namespace_environment() {
 
   local tag="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_TAG:-latest}"
   local image_name="${BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE}"
-  local remote_image="${registry}/${tenant_id}/${image_name}:${tag}"
+  local remote_image="${registry}/${tenant_slug}/${image_name}:${tag}"
   export DOCKER_PUSH_REMOTE_IMAGE="$remote_image"
 
   log_info "Namespace remote image: ${remote_image}"

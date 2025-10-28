@@ -7,6 +7,7 @@ Supported providers:
 - Google Artifact Registry (GAR)
 - Buildkite Packages Container Registry
 - Artifactory Docker Registry
+- Namespace Container Registry (requires Namespace CLI)
 
 ## Options
 
@@ -16,7 +17,7 @@ These are all the options available to configure this plugin's behaviour.
 
 #### `provider` (string)
 
-The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`, `artifactory`.
+The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`, `artifactory`, `namespace`.
 
 #### `image` (string)
 
@@ -98,6 +99,37 @@ The username for Artifactory authentication, typically your email address.
 #### `identity-token` (string)
 
 The Artifactory identity token for authentication. Can reference an environment variable using `$VARIABLE_NAME` syntax.
+
+### Namespace Provider Options
+
+**Important:** This plugin authenticates to Namespace and pushes an image that already exists in the local Docker daemon. It does **not** trigger Namespace remote builds. If you want to build remotely, run `nsc docker buildx build --push` yourself and let the remote builder push directly to `nscr.io`.
+
+#### `tenant-id` (string)
+
+The Namespace tenant/workspace ID (for example `tenant_abcd1234`). The plugin automatically derives the registry slug (`abcd1234`) from this value when tagging images.
+
+#### `registry` (string, default: `nscr.io`)
+
+Namespace registry host. Override only if you use a custom registry domain.
+
+#### `nsc-binary` (string, default: `/root/.ns/bin/nsc`)
+
+Path to the Namespace CLI (`nsc`). Leave unset if the CLI is available on `PATH`, or override if it is installed in a non-standard location.
+
+#### `auth-method` (string, default: `buildkite-oidc`)
+
+Authentication method to use. Supported values: `buildkite-oidc`, `aws-cognito`.
+
+- `buildkite-oidc`: Uses `buildkite-agent oidc request-token`. Available only in Buildkite pipelines with OIDC enabled.
+- `aws-cognito`: Exchanges AWS credentials for a Namespace token via Cognito. Requires the additional fields below.
+
+#### `buildkite-oidc.audience` (string, default: `federation.namespaceapis.com`)
+
+Custom OIDC audience when using `auth-method: buildkite-oidc`.
+
+#### `aws-cognito.region` and `aws-cognito.identity-pool` (strings)
+
+AWS Cognito region and identity pool GUID, required when `auth-method` is `aws-cognito`.
 
 ## Examples
 
@@ -187,6 +219,29 @@ steps:
             identity-token: $ARTIFACTORY_IDENTITY_TOKEN
 ```
 
+### Push to Namespace Container Registry (local build + push)
+
+This example builds an image locally on a Docker-capable agent (or DinD pod) and lets the plugin authenticate and push to Namespace using AWS Cognito. The Namespace CLI must be installed and accessible, along with `docker-credential-nsc` on the agent `PATH`.
+
+```yaml
+steps:
+  - label: ":namespace: Build & Push"
+    command: |
+      set -euo pipefail
+      docker build -t "namespace-app:latest" .
+    plugins:
+      - docker-image-push#v1.1.0:
+          provider: namespace
+          image: "namespace-app"
+          tag: "latest"
+          namespace:
+            tenant-id: "tenant_abcd1234"
+            auth-method: aws-cognito
+            aws-cognito:
+              region: "us-east-1"
+              identity-pool: "217947c4-e20e-4315-97f8-08e9a14c8dfb"
+```
+
 ### Verbose Mode
 
 Enable verbose mode for detailed debug output.
@@ -204,7 +259,7 @@ steps:
 
 | Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |
 | :-----------: | :-------------: | :----: | :----: |:---- |
-| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli` or `gcloud` for ECR and GAR respectively. Buildkite Packages only requires `docker`<br/>**Hosted (Mac)** - Docker engine not available |
+| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli`, `gcloud`, `docker`, `nsc` for ECR, GAR and Namespace respectively. Buildkite Packages only requires `docker`<br/>**Hosted (Mac)** - Docker engine not available |
 
 - ✅ Fully supported (all combinations of attributes have been tested to pass)
 - ⚠️ Partially supported (some combinations cause errors/issues)

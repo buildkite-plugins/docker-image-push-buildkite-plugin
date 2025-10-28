@@ -1,5 +1,5 @@
 name: Docker Image Push
-description: Push Docker images to ECR (AWS), GAR (Google Artifact Registry), Buildkite Packages, or Artifactory
+description: Push Docker images to ECR (AWS), GAR (Google Artifact Registry), Buildkite Packages, Artifactory, and Namespace
 author: https://github.com/buildkite-plugins
 requirements:
   - bash

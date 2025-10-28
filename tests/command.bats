@@ -105,7 +105,7 @@ EOF
   export BUILDKITE_ORGANIZATION_SLUG='env-org'
   export BUILDKITE_API_TOKEN='test-token'
   run "$PWD"/hooks/environment
-  assert_failure # Expected to fail at docker login (no real docker in test)
+  assert_success
   assert_output --partial 'Using organization slug from environment: env-org'
 }
 
@@ -168,7 +168,7 @@ EOF
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ARTIFACTORY_IDENTITY_TOKEN='$TEST_TOKEN'
   export TEST_TOKEN='actual-token-value'
   run "$PWD"/hooks/environment
-  assert_failure # Expected to fail at docker login (no real docker in test)
+  assert_success
   assert_output --partial 'Authenticating with Artifactory Docker registry'
 }
 

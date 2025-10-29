@@ -5,7 +5,7 @@ A Buildkite plugin to build and push Docker images to a variety of container reg
 Supported providers:
 - Amazon Elastic Container Registry (ECR)
 - Google Artifact Registry (GAR)
-- Buildkite Packages Container Registry
+- Buildkite Package Registries
 - Artifactory Docker Registry
 - Namespace Container Registry (requires Namespace CLI)
 

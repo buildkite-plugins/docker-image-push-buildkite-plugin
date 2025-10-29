@@ -43,8 +43,6 @@ The AWS region for the ECR registry.
 
 The full URL of the ECR registry (e.g., `123456789012.dkr.ecr.us-east-1.amazonaws.com`).
 
-
-
 ### GAR Provider Options
 
 **Note:** Authentication is handled by the `gcloud` CLI. Ensure your Buildkite agent has authenticated with Google Cloud before running this plugin (e.g., using a service account key or Workload Identity Federation).
@@ -121,15 +119,19 @@ Path to the Namespace CLI (`nsc`). Leave unset if the CLI is available on `PATH`
 Authentication method to use. Supported values: `buildkite-oidc`, `aws-cognito`.
 
 - `buildkite-oidc`: Uses `buildkite-agent oidc request-token`. Available only in Buildkite pipelines with OIDC enabled.
-- `aws-cognito`: Exchanges AWS credentials for a Namespace token via Cognito. Requires the additional fields below.
+- `aws-cognito`: Exchanges AWS credentials for a Namespace token via Cognito. Requires the additional fields below. See the [Namespace AWS Cognito federation guide](https://docs.namespace.so/docs/solutions/docker-builders#authenticate-with-aws-cognito) for cluster setup requirements.
 
 #### `buildkite-oidc.audience` (string, default: `federation.namespaceapis.com`)
 
 Custom OIDC audience when using `auth-method: buildkite-oidc`.
 
-#### `aws-cognito.region` and `aws-cognito.identity-pool` (strings)
+#### `aws-cognito.region` (string)
 
-AWS Cognito region and identity pool GUID, required when `auth-method` is `aws-cognito`.
+AWS region that hosts the Cognito identity pool (for example `us-east-1`).
+
+#### `aws-cognito.identity-pool` (string)
+
+Full Cognito identity pool identifier (GUID such as `217947c4-e20e-4315-97f8-08e9a14c8dfb`).
 
 ## Examples
 
@@ -221,7 +223,7 @@ steps:
 
 ### Push to Namespace Container Registry (local build + push)
 
-This example builds an image locally on a Docker-capable agent (or DinD pod) and lets the plugin authenticate and push to Namespace using AWS Cognito. The Namespace CLI must be installed and accessible, along with `docker-credential-nsc` on the agent `PATH`.
+This example builds an image locally on a Docker-capable agent (or DinD pod) and lets the plugin authenticate and push to Namespace using Buildkite OIDC. The Namespace CLI must be installed and accessible, along with `docker-credential-nsc` on the agent `PATH`.
 
 ```yaml
 steps:
@@ -236,10 +238,9 @@ steps:
           tag: "latest"
           namespace:
             tenant-id: "tenant_abcd1234"
-            auth-method: aws-cognito
-            aws-cognito:
-              region: "us-east-1"
-              identity-pool: "217947c4-e20e-4315-97f8-08e9a14c8dfb"
+            auth-method: buildkite-oidc
+            buildkite-oidc:
+              audience: "federation.namespaceapis.com"
 ```
 
 ### Verbose Mode
@@ -255,6 +256,7 @@ steps:
           image: my-app
           verbose: true
 ```
+
 ## Compatibility
 
 | Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |

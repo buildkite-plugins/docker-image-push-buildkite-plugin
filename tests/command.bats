@@ -191,6 +191,18 @@ EOF
   assert_output --partial 'Namespace tenant-id is required'
 }
 
+@test "Namespace provider requires nsc CLI" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='namespace'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_TENANT_ID='tenant123'
+
+  # Remove stubbed nsc binary to simulate missing CLI
+  rm -f "$BATS_TEST_TMPDIR/bin/nsc"
+
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'Namespace CLI (nsc) not found'
+}
+
 @test "Namespace provider with OIDC authenticates via buildkite-agent" {
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='namespace'
   export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_NAMESPACE_TENANT_ID='tenant123'

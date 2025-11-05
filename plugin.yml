@@ -1,5 +1,5 @@
 name: Docker Image Push
-description: Push Docker images to ECR (AWS), GAR (Google Artifact Registry), Buildkite Packages, or Artifactory
+description: Push Docker images to ECR (AWS), GAR (Google Artifact Registry), Buildkite Package Registries, Artifactory, or Namespace Private Container Registry
 author: https://github.com/buildkite-plugins
 requirements:
   - bash
@@ -8,7 +8,7 @@ configuration:
   properties:
     provider:
       type: string
-      enum: [ecr, gar, buildkite, artifactory]
+      enum: [ecr, gar, buildkite, artifactory, namespace]
       description: Registry provider type
     image:
       type: string
@@ -85,6 +85,43 @@ configuration:
         - registry-url
         - username
         - identity-token
+      additionalProperties: false
+    namespace:
+      type: object
+      description: Namespace registry configuration
+      properties:
+        tenant-id:
+          type: string
+          description: Namespace tenant/workspace ID
+        registry:
+          type: string
+          description: Namespace registry host (defaults to "nscr.io")
+        nsc-binary:
+          type: string
+          description: Path to Namespace CLI binary (defaults to /root/.ns/bin/nsc)
+        auth-method:
+          type: string
+          enum: [buildkite-oidc, aws-cognito]
+          default: buildkite-oidc
+        buildkite-oidc:
+          type: object
+          description: Settings for buildkite-oidc auth method
+          properties:
+            audience:
+              type: string
+              description: Custom OIDC audience (defaults to "federation.namespaceapis.com")
+          additionalProperties: false
+        aws-cognito:
+          type: object
+          description: Settings for aws-cognito auth method
+          properties:
+            region:
+              type: string
+              description: AWS region for Cognito federation
+            identity-pool:
+              type: string
+              description: AWS Cognito identity pool GUID
+          additionalProperties: false
       additionalProperties: false
     verbose:
       type: boolean

@@ -132,17 +132,19 @@ configuration:
           description: ACR registry URL (e.g., "myregistry.azurecr.io")
         client-id:
           type: string
-          description: Service principal application (client) ID for authentication
+          description: Service principal application (client) ID for authentication (required unless acr-login is true)
         client-secret:
           type: string
-          description: Service principal client secret for authentication
+          description: Service principal client secret for authentication (required unless acr-login is true)
+        acr-login:
+          type: boolean
+          description: Use Azure CLI (az acr login) for authentication instead of service principal credentials
+          default: false
         repository:
           type: string
           description: ACR repository name (defaults to the image name when omitted)
       required:
         - registry-url
-        - client-id
-        - client-secret
       additionalProperties: false
     verbose:
       type: boolean

@@ -8,6 +8,7 @@ Supported providers:
 - Buildkite Package Registries
 - Artifactory Docker Registry
 - Namespace Container Registry (requires Namespace CLI)
+- Azure Container Registry (ACR)
 
 ## Options
 
@@ -17,7 +18,7 @@ These are all the options available to configure this plugin's behaviour.
 
 #### `provider` (string)
 
-The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`, `artifactory`, `namespace`.
+The registry provider to use. Supported values: `ecr`, `gar`, `buildkite`, `artifactory`, `namespace`, `acr`.
 
 #### `image` (string)
 
@@ -133,6 +134,30 @@ AWS region that hosts the Cognito identity pool (for example `us-east-1`).
 
 Full Cognito identity pool identifier (GUID such as `217947c4-e20e-4315-97f8-08e9a14c8dfb`).
 
+### ACR Provider Options
+
+**Note:** Authentication can use either a Service Principal (client ID and secret) or the Azure CLI (`az acr login`).
+
+#### `registry-url` (string)
+
+The ACR registry URL (e.g., `myregistry.azurecr.io`). Do not include the protocol (`https://`).
+
+#### `client-id` (string)
+
+The Service Principal application (client) ID for authentication. Required unless `acr-login` is `true`. Can reference an environment variable using `$VARIABLE_NAME` syntax.
+
+#### `client-secret` (string)
+
+The Service Principal client secret for authentication. Required unless `acr-login` is `true`. Can reference an environment variable using `$VARIABLE_NAME` syntax.
+
+#### `acr-login` (boolean, default: `false`)
+
+Use Azure CLI (`az acr login`) for authentication instead of Service Principal credentials. When enabled, the Azure CLI must be installed and authenticated on the agent.
+
+#### `repository` (string)
+
+The ACR repository name. If omitted, it defaults to the image name.
+
 ## Examples
 
 ### Push to Amazon ECR
@@ -243,6 +268,41 @@ steps:
               audience: "federation.namespaceapis.com"
 ```
 
+### Push to Azure Container Registry
+
+This example pushes an image to ACR using Service Principal authentication.
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.2.0:
+          provider: acr
+          image: my-app
+          tag: "v1.2.3"
+          acr:
+            registry-url: myregistry.azurecr.io
+            client-id: $ACR_CLIENT_ID
+            client-secret: $ACR_CLIENT_SECRET
+```
+
+### Push to Azure Container Registry with Azure CLI
+
+This example uses Azure CLI authentication (requires `az` CLI to be installed and authenticated).
+
+```yaml
+steps:
+  - label: ":docker: Build and Push"
+    plugins:
+      - docker-image-push#v1.2.0:
+          provider: acr
+          image: my-app
+          tag: "v1.2.3"
+          acr:
+            registry-url: myregistry.azurecr.io
+            acr-login: true
+```
+
 ### Verbose Mode
 
 Enable verbose mode for detailed debug output.
@@ -261,7 +321,7 @@ steps:
 
 | Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |
 | :-----------: | :-------------: | :----: | :----: |:---- |
-| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli`, `gcloud`, `docker`, `nsc` for ECR, GAR and Namespace respectively. Buildkite Packages only requires `docker`<br/>**Hosted (Mac)** - Docker engine not available |
+| ✅ |  ⚠️ | ❌ | ⚠️ | **All** – Requires `awscli`, `gcloud`, `docker`, `nsc`, `az` for ECR, GAR, Namespace, and ACR (with `acr-login`) respectively. Buildkite Packages and ACR (with Service Principal) only require `docker`<br/>**Hosted (Mac)** - Docker engine not available |
 
 - ✅ Fully supported (all combinations of attributes have been tested to pass)
 - ⚠️ Partially supported (some combinations cause errors/issues)

@@ -341,3 +341,34 @@ EOF
   assert_success
   assert_output --partial 'Successfully authenticated with ACR'
 }
+
+@test "ACR provider with acr-login requires Azure CLI" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_ACR_LOGIN='true'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'Azure CLI (az) is required when acr-login is enabled'
+}
+
+@test "ACR provider with acr-login authenticates using Azure CLI" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_ACR_LOGIN='true'
+
+  cat <<'EOF' >"$BATS_TEST_TMPDIR/bin/az"
+#!/bin/bash
+if [[ "$1" == "acr" && "$2" == "login" ]]; then
+  exit 0
+fi
+echo "unexpected az call: $*" >&2
+exit 1
+EOF
+  chmod +x "$BATS_TEST_TMPDIR/bin/az"
+
+  run "$PWD"/hooks/environment
+  assert_success
+  assert_output --partial 'Successfully authenticated with ACR using Azure CLI'
+}

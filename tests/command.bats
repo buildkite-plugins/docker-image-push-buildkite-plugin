@@ -272,3 +272,103 @@ EOF
   assert_success
   assert_output --partial 'Namespace remote image: nscr.io/tenant123/test-image:test-tag'
 }
+
+@test "ACR provider requires registry URL" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_ID='test-client-id'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_SECRET='test-secret'
+  unset BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'ACR registry URL is required'
+}
+
+@test "ACR provider requires client ID" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_SECRET='test-secret'
+  unset BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_ID
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'ACR client ID is required'
+}
+
+@test "ACR provider requires client secret" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_ID='test-client-id'
+  unset BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_SECRET
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'ACR client secret is required'
+}
+
+@test "ACR provider processes environment variable credentials" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_ID='$TEST_CLIENT_ID'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_SECRET='$TEST_SECRET'
+  export TEST_CLIENT_ID='actual-client-id'
+  export TEST_SECRET='actual-secret-value'
+  run "$PWD"/hooks/environment
+  assert_success
+  assert_output --partial 'Authenticating with Azure Container Registry'
+}
+
+@test "ACR provider fails when environment variable is empty" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_ID='test-client-id'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_SECRET='$EMPTY_SECRET'
+  unset EMPTY_SECRET
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial "Environment variable 'EMPTY_SECRET' referenced by client-secret parameter is empty or not set"
+}
+
+@test "ACR provider authenticates successfully" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_ID='test-client-id'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_CLIENT_SECRET='test-secret'
+  run "$PWD"/hooks/environment
+  assert_success
+  assert_output --partial 'Successfully authenticated with ACR'
+}
+
+@test "ACR provider with acr-login requires Azure CLI" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_ACR_LOGIN='true'
+  run "$PWD"/hooks/environment
+  assert_failure
+  assert_output --partial 'Azure CLI (az) is required when acr-login is enabled'
+}
+
+@test "ACR provider with acr-login authenticates using Azure CLI" {
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_PROVIDER='acr'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_IMAGE='test-image'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_REGISTRY_URL='test.azurecr.io'
+  export BUILDKITE_PLUGIN_DOCKER_IMAGE_PUSH_ACR_ACR_LOGIN='true'
+
+  cat <<'EOF' >"$BATS_TEST_TMPDIR/bin/az"
+#!/bin/bash
+if [[ "$1" == "acr" && "$2" == "login" ]]; then
+  exit 0
+fi
+echo "unexpected az call: $*" >&2
+exit 1
+EOF
+  chmod +x "$BATS_TEST_TMPDIR/bin/az"
+
+  run "$PWD"/hooks/environment
+  assert_success
+  assert_output --partial 'Successfully authenticated with ACR using Azure CLI'
+}

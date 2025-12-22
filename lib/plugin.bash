@@ -15,6 +15,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/buildkite.bash"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/artifactory.bash"
 # shellcheck source=lib/providers/namespace.bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/namespace.bash"
+# shellcheck source=lib/providers/acr.bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/providers/acr.bash"
 
 setup_provider_environment() {
   local provider="$1"
@@ -34,6 +36,9 @@ setup_provider_environment() {
     ;;
   namespace)
     setup_namespace_environment
+    ;;
+  acr)
+    setup_acr_environment
     ;;
   *)
     unknown_provider "$provider"

@@ -168,7 +168,7 @@ This example pushes an image to an ECR repository.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: ecr
           image: my-app
           ecr:
@@ -184,7 +184,7 @@ This example pushes an image to a GAR repository with a specific tag.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: gar
           image: my-app
           tag: "v1.2.3"
@@ -202,7 +202,7 @@ This example pushes an image to Buildkite Packages using API token authenticatio
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: buildkite
           image: my-app
           tag: "v1.2.3"
@@ -220,7 +220,7 @@ This example uses OIDC authentication (recommended for Buildkite pipelines).
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: buildkite
           image: my-app
           buildkite:
@@ -236,7 +236,7 @@ This example pushes an image to an Artifactory Docker registry.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: artifactory
           image: my-app
           tag: "v1.2.3"
@@ -257,7 +257,7 @@ steps:
       set -euo pipefail
       docker build -t "namespace-app:latest" .
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: namespace
           image: "namespace-app"
           tag: "latest"
@@ -276,7 +276,7 @@ This example pushes an image to ACR using Service Principal authentication.
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: acr
           image: my-app
           tag: "v1.2.3"
@@ -294,7 +294,7 @@ This example uses Azure CLI authentication (requires `az` CLI to be installed an
 steps:
   - label: ":docker: Build and Push"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: acr
           image: my-app
           tag: "v1.2.3"
@@ -311,7 +311,7 @@ Enable verbose mode for detailed debug output.
 steps:
   - label: ":docker: Build and Push (Debug)"
     plugins:
-      - docker-image-push#v1.2.0:
+      - docker-image-push#v1.3.0:
           provider: ecr
           image: my-app
           verbose: true
